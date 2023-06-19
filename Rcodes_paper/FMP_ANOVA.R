@@ -183,8 +183,8 @@ female_prefecture_fixed<-lapply(1:length(part_list),
                                 function(k){Fixed_part[part_list[[k]],(n_age+1):(2*n_age) ]})
 
 source("Compute_coverages.R")
-Emp_cov_male_0.85<-matrix(0,nrow=n_prefectures,ncol = 12)
-Emp_cov_female_0.85<-matrix(0,nrow=n_prefectures,ncol = 12)
+Emp_cov_male_0.85<-matrix(0,nrow=n_prefectures,ncol = 6)
+Emp_cov_female_0.85<-matrix(0,nrow=n_prefectures,ncol = 6)
 for (i in 1:n_prefectures) {
   Emp_cov_male_0.85[i,]<-coverage_comp(sim_data=t(male_prefecture_res[[i]]),fixed_comp=t(male_prefecture_fixed[[i]]), sample_number=n_year, no_boot = 100,
                                        no_core=(detectCores()-2),K_val = NULL,prediction_method = "sieve_bootstrap"
