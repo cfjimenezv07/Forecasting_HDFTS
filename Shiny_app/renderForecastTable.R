@@ -1,13 +1,15 @@
 #point forecast errors per country per method per gender
-us.errors <- readRDS("tabledfs/us.Rds")
-france.errors <- readRDS("tabledfs/france.Rds")
-japan.errors <- readRDS("tabledfs/japan.Rds")
-australia.errors <- readRDS("tabledfs/australia.Rds")
 
-dflist <- list(USA = us.errors, France = france.errors, 
-               Japan = japan.errors, Australia = australia.errors)
 
-point.forecast.table <- function(df, .gender, .metric, .state, ltable = T) {
+point.forecast.table <- function(df, .gender, .metric, .state, type, ltable = T) {
+  
+  type <- ifelse(type == "EVR", 4, 3)
+  us.errors <- readRDS(paste0("tabledfs/us", type, ".Rds"))
+  france.errors <- readRDS(paste0("tabledfs/france", type, ".Rds"))
+  japan.errors <- readRDS(paste0("tabledfs/japan", type, ".Rds"))
+
+  dflist <- list(USA = us.errors, France = france.errors, Japan = japan.errors)
+
   df <- dflist[[df]]
   temp <- df %>% 
     filter(gender == .gender, metric == .metric)

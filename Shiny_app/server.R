@@ -22,9 +22,9 @@ SERVER <- function(input, output) {
   })
   output$metricsTable <- DT::renderDataTable({
     ltable <- point.forecast.table(input$countrySelector, 
-                                   input$genderSelector, "RMSPE", get.state(input))
+                                   input$genderSelector, "RMSPE", get.state(input), input$typeSelector)
     rtable <- point.forecast.table(input$countrySelector, 
-                                   input$genderSelector, "MAPE", get.state(input), F)
+                                   input$genderSelector, "MAPE", get.state(input), input$typeSelector, F)
     out <- cbind(ltable, rtable)
     sketch.upper <- htmltools::withTags(table(
       class = 'display',
@@ -35,7 +35,7 @@ SERVER <- function(input, output) {
           th(colspan = 2, 'MAPE')
         ),
         tr(
-          lapply(c('h', rep(c('FMP', 'FANOVA'), 2)), th)
+          lapply(c('h', rep(c('FMP-ANOVA', 'FM-ANOVA'), 2)), th)
         )
       )
     ))
@@ -44,7 +44,10 @@ SERVER <- function(input, output) {
                   container = sketch.upper)
   })
   output$rainbowPlot <- renderPlot({
-    rainbow.generator(input$countrySelector, get.state(input), input$genderSelector)
+    m <- matrix(c(rep(1, 2), rep(2, 2)), ncol = 2, byrow = T)
+    layout(m)
+    rainbow.generator(input$countrySelector, get.state(input), input$typeSelector, "FM", input$genderSelector, "FM-ANOVA")
+    rainbow.generator(input$countrySelector, get.state(input), input$typeSelector, "FMP", input$genderSelector, "FMP-ANOVA", T)
   })
   output$summaryMetricsTable <- DT::renderDataTable({
     sketch.lower <- htmltools::withTags(table(
@@ -56,14 +59,14 @@ SERVER <- function(input, output) {
           th(colspan = 2, 'MAPE')
         ),
         tr(
-          lapply(c('', rep(c('FMP', 'FANOVA'), 2)), th)
+          lapply(c('', rep(c('FMP-ANOVA', 'FM-ANOVA'), 2)), th)
         )
       )
     ))
     ltable <- point.forecast.table(input$countrySelector, 
-                                   input$genderSelector, "RMSPE", get.state(input))
+                                   input$genderSelector, "RMSPE", get.state(input), input$typeSelector)
     rtable <- point.forecast.table(input$countrySelector, 
-                                   input$genderSelector, "MAPE", get.state(input), F)
+                                   input$genderSelector, "MAPE", get.state(input), input$typeSelector, F)
     out <- cbind(ltable, rtable)[, -1]
     outmeans <- colMeans(out)
     outsd <- apply(out, 2, sd)
@@ -80,8 +83,8 @@ SERVER <- function(input, output) {
       thead(
         tr(
           th(colspan = 1, ''),
-          th(colspan = 2, 'FMP'),
-          th(colspan = 2, 'FANOVA')
+          th(colspan = 2, 'FMP-ANOVA'),
+          th(colspan = 2, 'FM-ANOVA')
         ),
         tr(
           lapply(c('', rep(c('80%', '95%'), 2)), th)

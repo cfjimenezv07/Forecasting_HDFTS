@@ -4,10 +4,9 @@ library(sf)
 us.map <- readRDS("shp/USA/usamap.Rds")
 france.map <- readRDS("shp/France/francemap.Rds")
 japan.map <- readRDS("shp/Japan/japanmap.Rds")
-australia.map <- readRDS("shp/Australia/australiamap.Rds")
 
 map.list <- list(USA = us.map, France = france.map, 
-                 Japan = japan.map, Australia = australia.map)
+                 Japan = japan.map)
 
 fill.color <- c("gray", "gold")
 

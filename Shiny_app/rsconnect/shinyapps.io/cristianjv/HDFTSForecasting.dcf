@@ -5,9 +5,9 @@ account: cristianjv
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 8737274
-bundleId: 7059604
+bundleId: 7956779
 url: https://cristianjv.shinyapps.io/HDFTSForecasting/
-when: 1680826423.27985
-lastSyncTime: 1680826423.27986
+when: 1700645492.72363
+lastSyncTime: 1700645492.72365
 asMultiple: FALSE
 asStatic: FALSE
