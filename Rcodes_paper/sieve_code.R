@@ -4,7 +4,6 @@
 
 source("nonparametric_fof_regression.R")
 source("method.FPE.R")
-# install.packages(c("sde", "sandwich", "vars", "ftsa", "doMC", "fda.usc", "far"))
 require(sde)
 require(ftsa)
 require(vars)

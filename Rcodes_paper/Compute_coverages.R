@@ -1,7 +1,15 @@
+# Script for computation of the coverage probabilities in prediction intervals. 
+
+
+####################################################################
+# Load the source file with the sieve bootstrap code.
 library(doMC)
 source("sieve_code.R")
+####################################################################
+
+
 #############################################
-# Function for computing the pointwise score
+# Function for computing the interval score
 #############################################
 
 # l: lower bound
@@ -17,13 +25,24 @@ interval_score <- function(holdout, lb, ub, alpha)
   return(score)
 }
 
-
+############################################################################################
+# Function for the computation of the pointwise coverage probability and CPD
+############################################################################################
+# sim_data:   denotes the functional residuals for each state and gender. A matrix of dimension N_year X n_age
+# fixed_comp: denotes the deterministic components for each state and gender. A matrix of dimension N_year X n_age
+# sample_number: denotes the number of curves in each group. In this case it referes to n_year
+# no_boot: the number of bootstrap samples in the sieve bootstrap procedure.
+# no_core: number of determined cores to carried out the computation.
+# method_pred: It refers to the prediction method to be used in the sieve bootstrap procedure. Bosq represents FAR(1) prediction method to forecast curves, and Bosq is the default
+# K_val: NULL by default. If K refers to the fixed number of PC.
+# selection_ncomp_porder: CPV_AICC is the default choice
+# percent_CPV: 0.85 (by default), for robustness check, we also consider 0.8 and 0.9
 
 coverage_comp <- function(sim_data,fixed_comp, sample_number=NULL, no_boot = 100,
                           no_core, method_pred = "Bosq", K_val = NULL,
                           selection_ncomp_porder="CPV_ACC",
                           prediction_method = c("sieve_bootstrap", "FAR_naive_bootstrap", "FAR_block_bootstrap")
-                          ,percent_CPV=0.90)
+                          ,percent_CPV= 0.90)
 {
   
   grid_point = seq(0, 1, length.out = nrow(sim_data))
