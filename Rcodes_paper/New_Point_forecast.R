@@ -19,7 +19,7 @@ library("ftsa")
 library("vars")
 source("forecast_Arima.R")
 
-#Auxilary function to select the functional component scores with the EVR criterion.
+#Auxiliary function to select the functional component scores with the EVR criterion.
 select_k <- function(tau, eigenvalue)
 {
   
@@ -48,12 +48,14 @@ select_k <- function(tau, eigenvalue)
 # prediction_method: denotes the prediction method. ARIMA or VAR.
 # select_K: denotes the method to select the number of PC to be retained.
 # K=6. If a pre-specified number of PC can be set by the username.
-# B: number of bootstrap samples 
+# B number of bootstrap samples, 1000 by default
+
 
 state_forecast_curves <- function(fixed_com, Residuals_f,
                                est_method = c("lrc", "cov"),
                                fh = 30,  
-                               prediction_method=c("ARIMA","VAR"),select_K=c("Fixed","EVR"), K=6,B=1000){
+                               prediction_method=c("ARIMA","VAR"),select_K=c("Fixed","EVR"), 
+                               K=6, B = 1000){
 
   med_polish_resi=t(Residuals_f)
   if(est_method == "lrc"){
@@ -92,7 +94,7 @@ state_forecast_curves <- function(fixed_com, Residuals_f,
   if(prediction_method=="ARIMA"){
     # obtain forecasts of PC scores via auto.arima
     for(ik in 1:retain_component){
-      dum = forecast_Arima(object=auto.arima(med_polish_resi_score[,ik]), h = fh, bootstrap = TRUE, npaths = B)
+      dum = forecast_Arima(object=auto.arima(med_polish_resi_score[,ik]), h = fh, bootstrap = TRUE, npaths = B) 
       med_polish_resi_score_forecast[ik,] = dum$mean
     }
   }else if(prediction_method=="VAR"){
@@ -139,7 +141,7 @@ ForecastC <- function(i,fixed_com,Residuals_f,est_method = c("lrc", "cov"),predi
     frc <- state_forecast_curves(fixed_com = fixed_com[state_k, ],
                                 Residuals_f = Residuals_f[state_k, ],
                                 est_method = est_method,
-                                fh = 1, prediction_method=prediction_method,select_K=select_K, K=K)
+                                fh = 1, prediction_method=prediction_method,select_K=select_K, K=K, B = 1000)
     forecasted_state[ , k] = frc$med_polish_curve_forecast
     TV[,k]=frc$TV
 
@@ -165,7 +167,7 @@ ForecastC_expanding <- function(i,fixed_com,Residuals_f,est_method = c("lrc", "c
     frc=state_forecast_curves(fixed_com=fixed_com[state_k,],
                              Residuals_f=Residuals_f[state_k,],
                              est_method = est_method,
-                             fh = k ,prediction_method=prediction_method,select_K=select_K, K=K)
+                             fh = k ,prediction_method=prediction_method,select_K=select_K, K=K, B = 1000)
     forecasted_state[,k]=frc$med_polish_curve_forecast[,1]
     TV[,k]=frc$TV
   }

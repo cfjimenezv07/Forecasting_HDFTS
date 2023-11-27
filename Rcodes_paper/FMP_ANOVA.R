@@ -11,7 +11,8 @@
 
 
 packages <- c("generics", "demography", "forecast","fda","fdaoutlier", 
-              "rlist", "mrfDepth","ftsa","rainbow")
+              "rlist", "mrfDepth","ftsa","rainbow",
+              "foreach", "doParallel", "vars", "fda.usc", "far")
 
 ## Now load or install&load all
 package_check <- lapply(
@@ -28,10 +29,11 @@ package_check <- lapply(
 # 2.  Set a working directory
 ###########################################################################################
 # This directory must constain the folder with all the codes for this project
-setwd("~/My Drive/Fall 2023/STAT 397/PhD project 4/Revisions from JCGS/Final_Rcodes_editor/")
+setwd("~/My Drive/Fall 2023/STAT 397/PhD project 4/Revisions from JCGS/Rcodes/Rcodes_paper/")
 # Define an extra folder within the working directory where the results will be saved. 
 # dirl.p is the path to that folder.
-dirl.p <- "./Test_Results/"
+#dirl.p <- "~/My Drive/Fall 2023/STAT 397/PhD project 4/Revisions from JCGS/Test_Results/"
+dirl.p <- "../Test_Results/"
 ##########################################################################################################
 # 3. Load dataset entries and define the row (by states) and column partitions (by gender)
 # Note: If you want to change to another dataset, please change the word USA onwards. (e.g. France/Japan) 
@@ -62,16 +64,16 @@ names_states <- readRDS("./names_states/USA/names_states.rds")
 ################################################################################
 remove_zeroes <- function(data_raw,n_states,n_year,n_age) {
   N       <- n_states
-  T       <- n_year
+  t.max       <- n_year
   age_max <- n_age
   
   data_nozero <- list()
   for(i in 1:N) {
-    data_nozero[[i]] <- matrix(data_raw[[i]],age_max,T)
+    data_nozero[[i]] <- matrix(data_raw[[i]],age_max,t.max)
   }
   for(i in 1:N) {
     for(j in 2:age_max) {#For j=1, the two zeroes have been removed before
-      for(k in 1:T){ 
+      for(k in 1:t.max){ 
         if(data_nozero[[i]][j,k]==-Inf){
           data_nozero[[i]][j,k] <- data_nozero[[i]][j-1,k]
         }
@@ -133,15 +135,28 @@ source("New_Point_forecast.R") # This auxiliary file contain the functions for c
 # 6.1 With a rolling window approach
 cl <- makePSOCKcluster(detectCores()-2)
 registerDoParallel(cl)
-R_forecasted_FMP_cov_ARIMA_USA_EVR <- foreach(i = 1:n_states, .packages = c("ftsa")) %dopar% ForecastC(i,fixed_com=Fixed_part,Residuals_f=Residuals_,est_method = "cov",prediction_method="ARIMA",select_K="EVR", K=6)
-R_forecasted_FMP_cov_ARIMA_USA_K6 <- foreach(i = 1:n_states, .packages = c("ftsa")) %dopar% ForecastC(i,fixed_com=Fixed_part,Residuals_f=Residuals_,est_method = "cov",prediction_method="ARIMA",select_K="Fixed", K=6)
+R_forecasted_FMP_cov_ARIMA_USA_EVR <- foreach(i = 1:n_states, .packages = c("ftsa")) %dopar% ForecastC(i,fixed_com=Fixed_part,
+                                                                                                       Residuals_f=Residuals_,est_method = "cov",
+                                                                                                       prediction_method="ARIMA",select_K="EVR", K=6)
+
+R_forecasted_FMP_cov_ARIMA_USA_K6 <- foreach(i = 1:n_states, .packages = c("ftsa")) %dopar% ForecastC(i,fixed_com=Fixed_part,
+                                                                                                      Residuals_f=Residuals_,
+                                                                                                      est_method = "cov",
+                                                                                                      prediction_method="ARIMA",select_K="Fixed", K=6)
 stopCluster(cl)
 
 # 6.2  With an expanding window approach
 cl <- makePSOCKcluster(detectCores()-2)
 registerDoParallel(cl)
-E_forecasted_FMP_cov_ARIMA_USA_EVR <- foreach(i = 1:n_states, .packages = c("ftsa")) %dopar% ForecastC_expanding(i,fixed_com=Fixed_part,Residuals_f=Residuals_,est_method = "cov",prediction_method="ARIMA",select_K="EVR", K=6)
-E_forecasted_FMP_cov_ARIMA_USA_K6 <- foreach(i = 1:n_states, .packages = c("ftsa")) %dopar% ForecastC_expanding(i,fixed_com=Fixed_part,Residuals_f=Residuals_,est_method = "cov",prediction_method="ARIMA",select_K="Fixed", K=6)
+
+E_forecasted_FMP_cov_ARIMA_USA_EVR <- foreach(i = 1:n_states, .packages = c("ftsa")) %dopar% ForecastC_expanding(i,fixed_com=Fixed_part,
+                                                                                                                 Residuals_f=Residuals_,
+                                                                                                                 est_method = "cov",
+                                                                                                                 prediction_method="ARIMA",select_K="EVR", K=6)
+E_forecasted_FMP_cov_ARIMA_USA_K6 <- foreach(i = 1:n_states, .packages = c("ftsa")) %dopar% ForecastC_expanding(i,fixed_com=Fixed_part,
+                                                                                                                Residuals_f=Residuals_,
+                                                                                                                est_method = "cov",
+                                                                                                                prediction_method="ARIMA",select_K="Fixed", K=6)
 stopCluster(cl)
 
 # The result from each computation is a list with n_states lists within. 
@@ -158,9 +173,9 @@ saveRDS(R_forecasted_FMP_cov_ARIMA_USA_K6,paste0(dirl.p,"R_forecasted_FMP_cov_AR
 #  A complete similar approach can be used to compute forecast errors from the expanding window approach.
 ###########################################################################################################
 # This auxiliary file contains all the functions to compute the forcast errors
-source(".forecast_errors.R")
+source("forecast_errors.R")
 # 7.1 Load the forecasted curves obtained either in the step 6.1 or 6.2. 
-# e.g. Here it is loaded the results from the rolling window approach and with the EVR criterion.
+# e.g. Here it is loades the results from the rolling window approach and with the EVR criterion.
 forecasted_FMP_cov_ARIMA_USA <- R_forecasted_FMP_cov_ARIMA_USA_EVR
 # Define the forecast horizon.
 max_h=10
@@ -170,38 +185,38 @@ error_RMSPE_male<-matrix(0,nrow=max_h,ncol = n_states)
 error_MAPE_female<-matrix(0,nrow=max_h,ncol = n_states)
 error_RMSPE_female<-matrix(0,nrow=max_h,ncol = n_states)
 for (i in 1:n_states) {
-  forecasted_state_male=forecasted_FMP_cov_ARIMA_USA[[i]][[1]][1:n_age,]
-  forecasted_state_female=forecasted_FMP_cov_ARIMA_USA[[i]][[1]][(n_age+1):(2*n_age),]
-  True_pop_male=t(male[(n_year*i-(max_h-1)):(n_year*i),])
-  True_pop_female=t(female[(n_year*i-(max_h-1)):(n_year*i),])
+  forecasted_pref_male=forecasted_FMP_cov_ARIMA_USA[[i]][[1]][1:n_age,]
+  forecasted_pref_female=forecasted_FMP_cov_ARIMA_USA[[i]][[1]][(n_age+1):(2*n_age),]
+  True_pop_male=t(all_male[(n_year*i-(max_h-1)):(n_year*i),]) 
+  True_pop_female=t(all_female[(n_year*i-(max_h-1)):(n_year*i),]) 
   for (j in 1:max_h) {
-    error_MAPE_male[j,i]<-mape(forecast=forecasted_state_male[,j], true=True_pop_male[,j])
-    error_RMSPE_male[j,i]<-rmspe(forecast=forecasted_state_male[,j], true=True_pop_male[,j])
-    error_MAPE_female[j,i]<-mape(forecast=forecasted_state_female[,j], true=True_pop_female[,j])
-    error_RMSPE_female[j,i]<-rmspe(forecast=forecasted_state_female[,j], true=True_pop_female[,j])
+    error_MAPE_male[j,i]<-mape(forecast=forecasted_pref_male[,j], true=True_pop_male[,j])
+    error_RMSPE_male[j,i]<-rmspe(forecast=forecasted_pref_male[,j], true=True_pop_male[,j])
+    error_MAPE_female[j,i]<-mape(forecast=forecasted_pref_female[,j], true=True_pop_female[,j])
+    error_RMSPE_female[j,i]<-rmspe(forecast=forecasted_pref_female[,j], true=True_pop_female[,j])
     
   }
   
 }
 
 # save all the errors in a matrix. This errirs are per each state at each forecast horizon 1:10
-All_errors_rolling <- list(error_MAPE_male,error_MAPE_female,
+All_errors_rolling<-list(error_MAPE_male,error_MAPE_female,
                          error_RMSPE_male,error_RMSPE_female)
 # Save the results
 saveRDS(All_errors_rolling,paste0(dirl.p,"All_errors_R_FMP_cov_ARIMA_USA_EVR.rds"))
 
 # 7.2 Average the results across the forecast horizon.
-Errors_mean_rolling<-matrix(0,nrow <- n_states,ncol=length(All_errors_rolling))
-Errors_sd_rolling<-matrix(0,nrow   <- n_states,ncol=length(All_errors_rolling))
+Errors_mean_rolling<-matrix(0,nrow=n_states,ncol=length(All_errors_rolling))
+Errors_sd_rolling<-matrix(0,nrow=n_states,ncol=length(All_errors_rolling))
 for (i in 1:length(All_errors_rolling)) {
   error=All_errors_rolling[[i]]
-  Errors_mean_rolling[,i] <- apply( error,2,mean)
-  Errors_sd_rolling[,i]   <- apply( error,2,sd)
+  Errors_mean_rolling[,i]=apply( error,2,mean)
+  Errors_sd_rolling[,i]=apply( error,2,sd)
 }
-colnames(Errors_mean_rolling) <- c("MAPE_male","MAPE_female","RMSPE_male","RMSPE_female")
-colnames(Errors_sd_rolling)   <- c("MAPE_male","MAPE_female","RMSPE_male","RMSPE_female")
-rownames(Errors_mean_rolling) <- names_states
-rownames(Errors_sd_rolling)   <- names_states
+colnames(Errors_mean_rolling)<-c("MAPE_male","MAPE_female","RMSPE_male","RMSPE_female")
+colnames(Errors_sd_rolling)<-c("MAPE_male","MAPE_female","RMSPE_male","RMSPE_female")
+rownames(Errors_mean_rolling)<-names_states
+rownames(Errors_sd_rolling)<-names_states
 
 # Save the results of the forecast errors accross forecast horizon.
 saveRDS(Errors_mean_rolling,paste0(dirl.p,"Errors_R_FMP_cov_ARIMA_USA_EVR.rds"))
@@ -225,9 +240,11 @@ female_states_fixed <- lapply(1:length(part_list),
 
 # This auxiliary function contains the functions and auxiliary files to compute the coverage probability.
 source("Compute_coverages.R")
+#n_states
+Emp_cov_male_0.85<-matrix(0,nrow=n_states,ncol = 6)
+Emp_cov_female_0.85<-matrix(0,nrow=n_states,ncol = 6)
+#6 refers to 2 pointwise coverage (80 and 95), CDP (80 and 95), interval score (80 and 95)
 
-Emp_cov_male_0.85<-matrix(0,nrow=n_states,ncol = max_h)
-Emp_cov_female_0.85<-matrix(0,nrow=n_states,ncol = max_h)
 for (i in 1:n_states) {
   Emp_cov_male_0.85[i,]<-coverage_comp(sim_data=t(male_states_res[[i]]),fixed_comp=t(male_states_fixed[[i]]), sample_number=n_year, no_boot = 100,
                                        no_core=(detectCores()-2),K_val = NULL,prediction_method = "sieve_bootstrap"

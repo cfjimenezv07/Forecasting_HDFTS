@@ -4,11 +4,11 @@
 
 source("nonparametric_fof_regression.R")
 source("method.FPE.R")
-require(sde)
+require(sde) 
 require(ftsa)
 require(vars)
 require(sandwich)
-require(doMC)
+require(doParallel) #require(doMC)
 require(fda.usc)
 require(far)
 
@@ -893,7 +893,7 @@ coverage_sim <- function(DGP = c("FAR", "FARMA"), seed_number, sample_number, no
   {
     if(is.null(K_val))
     {
-      registerDoMC(no_core)
+      registerDoParallel(no_core) #registerDoMC(no_core)
       sieve_boot = foreach(iwk = 1:n_testing) %dopar% sieve_bootstrap(fun_dat = t(sim_data[,1:(n_training_ini - 1 + iwk)]),
                                                                       k_observed_fun = nrow(t(sim_data[,1:(n_training_ini - 1 + iwk)])) - 1,
                                                                       grid = grid_point, ncomp_porder_selection = selection_ncomp_porder,
@@ -901,7 +901,7 @@ coverage_sim <- function(DGP = c("FAR", "FARMA"), seed_number, sample_number, no
     }
     else
     {
-      registerDoMC(no_core)
+      registerDoParallel(no_core) #registerDoMC(no_core)
       sieve_boot = foreach(iwk = 1:n_testing) %dopar% sieve_bootstrap(fun_dat = t(sim_data[,1:(n_training_ini - 1 + iwk)]),
                                                                       k_observed_fun = K_val,
                                                                       grid = grid_point, ncomp_porder_selection = selection_ncomp_porder,
@@ -942,7 +942,7 @@ coverage_sim <- function(DGP = c("FAR", "FARMA"), seed_number, sample_number, no
   }
   if(prediction_method == "FAR_naive_bootstrap"|prediction_method == "FAR_block_bootstrap")
   {
-    registerDoMC(no_core)
+    registerDoParallel(no_core) #registerDoMC(no_core)
     # far_boot = foreach(iwk = 1:n_testing) %dopar% far_boot(sim_dat = sim_data[,1:(n_training_ini - 1 + iwk)], bootrep = no_boot)
     if(prediction_method == "FAR_naive_bootstrap")
     {

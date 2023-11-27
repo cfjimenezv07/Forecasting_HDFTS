@@ -1,7 +1,5 @@
 # auxiliary functions for the HNT method
 
-##### set a working directory
-setwd("~/My Drive/Fall 2023/STAT 397/PhD project 4/Revisions from JCGS/Final_Rcodes_editor/")
 source('./MITS_class.R') 
 
 init_data_new <-  function(data,p,Names){

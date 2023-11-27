@@ -66,7 +66,12 @@ gen_plot <- function(df, legend = T) {
   for (gender in c("Female", "Male")) {
     (p +
        ggforce::facet_wrap_paginate(~gender, nrow = 1, ncol = 1, page = co))
-
+    # if (legend) {
+    #   temp <- temp +
+    #     ggforce::facet_wrap_paginate(~gender, nrow = 1, ncol = 1, page = co) +
+    #     theme(strip.background = element_blank(), strip.text = element_blank())
+    # }
+    # ggsave(paste0("./Plot/",filename, gender, ".eps"))
     co <- co + 1
   }
   return(p)

@@ -3,7 +3,8 @@
 
 ####################################################################
 # Load the source file with the sieve bootstrap code.
-library(doMC)
+# library(doMC)
+library(doParallel)
 source("sieve_code.R")
 ####################################################################
 
@@ -63,18 +64,18 @@ coverage_comp <- function(sim_data,fixed_comp, sample_number=NULL, no_boot = 100
   {
     if(is.null(K_val))
     {
-      registerDoMC(no_core)
-      sieve_boot = foreach(iwk = 1:n_testing) %dopar% sieve_bootstrap(fun_dat = t(sim_data[,1:(n_training_ini - 1 + iwk)]),
+      registerDoParallel(no_core) #registerDoMC(no_core)
+      sieve_boot = foreach(iwk = 1:n_testing, .export = c("sieve_bootstrap"), .packages = c("ftsa", "fda", "vars", "sde", "sandwich", "fda.usc", "far")) %dopar% sieve_bootstrap(fun_dat = t(sim_data[,1:(n_training_ini - 1 + iwk)]),
                                                                       k_observed_fun = nrow(t(sim_data[,1:(n_training_ini - 1 + iwk)])) - 1,
                                                                       grid = grid_point, ncomp_porder_selection = selection_ncomp_porder,
                                                                       CPV_percent = percent_CPV, pred_method = method_pred, B = no_boot
-                                                                      ,PI_alpha = c(0.8, 0.95), semi_metric = "deriv", 
+                                                                      ,PI_alpha = c(0.8, 0.95), semi_metric = "deriv",
                                                                       q_order = 2,VAR_type = "none")
     }          
     else
     {
-      registerDoMC(no_core)
-      sieve_boot = foreach(iwk = 1:n_testing) %dopar% sieve_bootstrap(fun_dat = t(sim_data[,1:(n_training_ini - 1 + iwk)]),
+      registerDoParallel(no_core) #registerDoMC(no_core)
+      sieve_boot = foreach(iwk = 1:n_testing, .export = c("sieve_bootstrap"), .packages = c("ftsa", "fda", "vars", "sde", "sandwich", "fda.usc", "far")) %dopar% sieve_bootstrap(fun_dat = t(sim_data[,1:(n_training_ini - 1 + iwk)]),
                                                                       k_observed_fun = nrow(t(sim_data[,1:(n_training_ini - 1 + iwk)])) - 1,
                                                                       grid = grid_point, ncomp_porder_selection = selection_ncomp_porder,
                                                                       CPV_percent = percent_CPV, pred_method = method_pred, B = no_boot
@@ -91,19 +92,13 @@ coverage_comp <- function(sim_data,fixed_comp, sample_number=NULL, no_boot = 100
       parametric_pointwise_PI_95_lb[,ik] = sieve_boot[[ik]]$parametric_pointwise_out_fore_95[,1]+fixed_comp[,1]
       parametric_pointwise_PI_95_ub[,ik] = sieve_boot[[ik]]$parametric_pointwise_out_fore_95[,2]+fixed_comp[,2]
       
-      nonparametric_pointwise_PI_80_lb[,ik] = sieve_boot[[ik]]$nonparametric_pointwise_out_fore_80[,1]+fixed_comp[,1]
-      nonparametric_pointwise_PI_80_ub[,ik] = sieve_boot[[ik]]$nonparametric_pointwise_out_fore_80[,2]+fixed_comp[,2]
-      
-      nonparametric_pointwise_PI_95_lb[,ik] = sieve_boot[[ik]]$nonparametric_pointwise_out_fore_95[,1]+fixed_comp[,1]
-      nonparametric_pointwise_PI_95_ub[,ik] = sieve_boot[[ik]]$nonparametric_pointwise_out_fore_95[,2]+fixed_comp[,2]
-      
       print(paste("sieve_", ik, sep="")); rm(ik)
     }
     rm(sieve_boot)
   }
   if(prediction_method == "FAR_naive_bootstrap"|prediction_method == "FAR_block_bootstrap")
   {
-    registerDoMC(no_core)
+    registerDoParallel(no_core) #registerDoMC(no_core) modified
     # far_boot = foreach(iwk = 1:n_testing) %dopar% far_boot(sim_dat = sim_data[,1:(n_training_ini - 1 + iwk)], bootrep = no_boot)
     if(prediction_method == "FAR_naive_bootstrap")
     {

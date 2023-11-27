@@ -11,7 +11,9 @@
 # 1. First install all the R packages and libraries required for the project
 ###########################################################################################
 packages <- c("generics", "demography", "forecast","fda","fdaoutlier", 
-              "rlist", "mrfDepth","ftsa","rainbow")
+              "rlist", "mrfDepth","ftsa","rainbow", 
+              "foreach", "doParallel", "vars", "fda.usc", "far",
+              "gdata", "MTS", "RSpectra", "tictoc", "VAR.etp")
 
 ## Now load or install&load all
 package_check <- lapply(
@@ -63,16 +65,16 @@ names_states <- readRDS("./names_states/USA/names_states.rds")
 ################################################################################
 remove_zeroes <- function(data_raw,n_states,n_year,n_age) {
   N       <- n_states
-  T       <- n_year
+  t.max       <- n_year
   age_max <- n_age
   
   data_nozero <- list()
   for(i in 1:N) {
-    data_nozero[[i]] <- matrix(data_raw[[i]],age_max,T)
+    data_nozero[[i]] <- matrix(data_raw[[i]],age_max,t.max)
   }
   for(i in 1:N) {
     for(j in 2:age_max) {#For j=1, the two zeroes have been removed before
-      for(k in 1:T){ 
+      for(k in 1:t.max){ 
         if(data_nozero[[i]][j,k]==-Inf){
           data_nozero[[i]][j,k] <- data_nozero[[i]][j-1,k]
         }
@@ -108,7 +110,7 @@ order <- 3
 r <- 3
 p <- 9
 h_max <- 10 # forecast horizon
-years <-  sapply(colnames(USA_female[[1]]),toString)
+years <-  year
 tmp <- init_data_new(data=USA_female,p,Names=names_states)
 data_female <- tmp[[1]]  # datasets for Gao2019
 mixed_fts_female <- tmp[[2]]
@@ -145,7 +147,7 @@ for(t in 1:h_max){
 
 
 for(h in 1:h_max){
-  predictions_HNT_female[[h]][,1,] <- predict_HNT_rknown_v2(cp_female[[years[n_year+h-h_max]]],h,p,basis,args,r_hat_female[[years[n_year+h-h_max]]])
+  predictions_HNT_female[[h]][,1,] <- predict_NTH_rknown_v2(cp_female[[years[n_year+h-h_max]]],h,p,basis,args,r_hat_female[[years[n_year+h-h_max]]])
   
 }
 
@@ -168,7 +170,7 @@ saveRDS(predictions_GAO_female,paste0(dirl.p,"predictions_GAO_female_USA.rds"))
 ################################################################################
 
 
-tmp <- init_data_new(data=USA_male,p,Names=names_states_USA)
+tmp <- init_data_new(data=USA_male,p,Names=names_states)
 data_male <- tmp[[1]]  # datasets for Gao2019
 mixed_fts_male <- tmp[[2]]
 # basis splines
@@ -204,7 +206,7 @@ for(t in 1:h_max){
 
 
 for(h in 1:h_max){
-  predictions_HNT_male[[h]][,1,] <- predict_HNT_rknown_v2(cp_male[[years[n_year+h-h_max]]],h,p,basis,args,r_hat_male[[years[n_year+h-h_max]]])
+  predictions_HNT_male[[h]][,1,] <- predict_NTH_rknown_v2(cp_male[[years[n_year+h-h_max]]],h,p,basis,args,r_hat_male[[years[n_year+h-h_max]]])
   
 }
 
