@@ -1,4 +1,4 @@
-# Replicate Hallin et al. 2023b (HNT) and Gao et al. 2019 (GSY) methods for our datasets. 
+# Replicate Hallin et al. 2023 (HNT) and Gao et al. 2019 (GSY) methods for our datasets. 
 # These Rcodes are public posted in https://zenodo.org/record/7408999 from HNT23, it includes GSY19.
 # We adapted to our paper cases.
 
