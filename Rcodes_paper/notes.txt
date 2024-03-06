@@ -1,17 +1,1 @@
-FM_ANOVA.R
-- Added some additional libraries that were required by the New_Point_forecast.R script
-- Replaced T by t. in the remove_zeroes function
-- Replaced fixed_com and residuals_f for the window rolling approach passed to the ForecastC
-function.
 
-New_Point_forecast.R
-- The variable B does not exist, therefore code will break. Must assign a value to be used as
-npaths arg for the forecas_Arima funcion (set as the default of 5000)
-
-- Is the vars package built in or is it included as a depency of any other package?
-
-Compute_coverages.R
-- Changed registerDoMC with registerDoParallel
-
-Extra:
-fixed typos on FM_ANOVA, New_Point_forecast
