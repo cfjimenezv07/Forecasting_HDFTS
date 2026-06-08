@@ -1,7 +1,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/cfjimenezv07/HDFTS_Mortality">
-    <img src="KAUST.png" alt="KAUST Logo" height="150">
+    <img src="Kaustlogo.png" alt="KAUST Logo" height="150">
     <img src="MQ.png" alt="MQ Logo" height="150">
   </a>
 
