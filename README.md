@@ -20,12 +20,12 @@ The R script files in the `R Code` folder should be used in the following order:
 * **FM_ANOVA.R**: Computes the Functional Mean Analysis of Variance (FM) decomposition on FTS to isolate deterministic and time-varying components.
 * **FMP_ANOVA.R**: Computes the Functional Multi-way Panel Analysis of Variance based on the Functional Median Polish (FMP) framework to decompose FTS into deterministic and time-varying components.
 * **MITS_class.R**: Defines custom object structures and classes to efficiently manipulate and organize multivariate panel functional time series streams.
-* **aux_HNT.R**: Serves as the primary helper script housing backend functions and numerical routines for the core high-dimensional estimation framework.
+* **aux_HNT.R**: Auxiliary functions for the implementation of Hallin et al (2023) JTSA.
 
 #### 2. Forecasting Engine & Evaluation (`Rcodes_paper/`)
 * **method.FPE.R**: Determines the optimal number of functional principal components to retain using the Functional Prediction Error criterion.
 * **forecast_Arima.R**: Fits ARIMA models to the estimated functional principal component scores to project them across future horizons.
-* **nonparametric_fof_regression.R**: Performs function-on-function non-parametric regressions to link historical panel patterns with future dynamics.
+* **nonparametric_fof_regression.R**: Performs function-on-function non-parametric regressions.
 * **New_Point_forecast.R**: Coordinates the primary forecasting engine, computing the point forecasts (PFE) for the functional residuals obtained from FMP-ANOVA and FM-ANOVA.
 * **Naive_point_forecasts.R**: Computes the naive point forecasts based on the assumption of cross-sectional independence.
 * **sieve_code.R**: Implements the functional sieve bootstrap framework by Paparoditis and Han Lin Shang (JASA 2023) utilized to build simultaneous, uniform prediction bands.
@@ -46,7 +46,6 @@ The R script files in the `R Code` folder should be used in the following order:
 ## How to Cite
 If you use this code or methodology in your research, please cite our paper:
 
-**APA Style:**
 > Jiménez-Varón, C. F., Sun, Y., & Shang, H. L. (2024). Forecasting High-Dimensional Functional Time Series: Application to Sub-National Age-Specific Mortality. *Journal of Computational and Graphical Statistics*, 33(4), 1160–1174. https://doi.org/10.1080/10618600.2024.2319166
 
 **BibTeX:**
